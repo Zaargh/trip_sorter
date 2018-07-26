@@ -1,29 +1,61 @@
 from typing import Dict, List
 
+from trip_sorter.utils import all_unique
 
-class InvalidTripException(Exception):
+
+class TripSorterException(Exception):
     pass
 
 
-def sort_trip(unsorted_trip: List[Dict]):
-    """ Returns sorted trip. If trip is invalid, raises InvalidTripException
-    """
-    if not _is_valid(unsorted_trip):
-        raise InvalidTripException
+class TripSorter:
+    def __init__(self, unsorted_trip: List[Dict]):
+        self.unsorted_trip = unsorted_trip
+        self.trip_legs_by_start = {t["from"]: t for t in self.unsorted_trip}
 
+    def run(self):
+        """ Returns sorted trip. If trip is invalid, raises TripSorterException
+        """
+        self._check_duplicates()
 
-def _is_valid(unsorted_trip: List[Dict]):
-    starts = [x["from"] for x in unsorted_trip]
-    destinations = [x["to"] for x in unsorted_trip]
+        # evaluate properties to run validation
+        start = self.start
+        destination = self.destination
 
-    # Assuming that there are no loops in the trip.
-    if len(starts) != len(set(starts)) or len(destinations) != len(set(destinations)):
-        return False
+        sorted_trip = []
+        current_location = start
+        while self.trip_legs_by_start:
+            current_leg = self.trip_legs_by_start.pop(current_location)
+            sorted_trip.append(current_leg)
+            current_location = current_leg["to"]
 
-    start = set(starts) - set(destinations)
-    destination = set(destinations) - set(starts)
+        return sorted_trip
 
-    if len(start) != 1 or len(destination) != 1:
-        return False
+    @property
+    def starts(self):
+        return [x["from"] for x in self.unsorted_trip]
 
-    return True
+    @property
+    def destinations(self):
+        return [x["to"] for x in self.unsorted_trip]
+
+    @property
+    def start(self):
+        s = set(self.starts) - set(self.destinations)
+        if len(s) != 1:
+            raise TripSorterException("Cannot determine trip start.")
+        return s.pop()
+
+    @property
+    def destination(self):
+        d = set(self.destinations) - set(self.starts)
+        if len(d) != 1:
+            raise TripSorterException("Cannot determine trip start.")
+        return d.pop()
+
+    def _check_duplicates(self):
+        """ Check weather there are duplicates in starts or destinations.
+        This would mean there's a loop in the trip, and that's not allowed
+        for now.
+        """
+        if not all_unique(self.starts) or not all_unique(self.destinations):
+            raise TripSorterException("There are duplicates in starts or destinations")

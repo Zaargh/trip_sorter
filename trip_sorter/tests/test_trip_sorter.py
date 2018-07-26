@@ -1,7 +1,7 @@
 import pytest
 
-from trip_sorter import sort_trip
-from trip_sorter.sorter import _is_valid, InvalidTripException
+from trip_sorter import TripSorter
+from trip_sorter.sorter import TripSorterException
 
 
 def test_sort_trip():
@@ -24,21 +24,9 @@ def test_sort_trip():
         {"from": "Berlin", "to": "Helsinki", "info": "flight 34B, no seat"},
     ]
 
-    assert sorted_trip == sort_trip(unsorted_trip)
-
-
-def test_invalid_trip(invalid_trip):
-    assert not _is_valid(invalid_trip)
-
-
-def test_valid_trip():
-    valid_trip = [
-        {"from": "A", "to": "B", "info": "x"},
-        {"from": "B", "to": "C", "info": "c"},
-    ]
-    assert _is_valid(valid_trip)
+    assert sorted_trip == TripSorter(unsorted_trip).run()
 
 
 def test_trip_sorter_raises_exception_for_invalid_trip(invalid_trip):
-    with pytest.raises(InvalidTripException):
-        sort_trip(invalid_trip)
+    with pytest.raises(TripSorterException):
+        TripSorter(invalid_trip).run()

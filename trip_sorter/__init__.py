@@ -1,1 +1,1 @@
-from trip_sorter.sorter import sort_trip
+from trip_sorter.sorter import TripSorter, TripSorterException
