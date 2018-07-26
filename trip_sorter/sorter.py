@@ -18,8 +18,8 @@ class TripSorter:
         self._check_duplicates()
 
         # evaluate properties to run validation
-        start = self.start
-        destination = self.destination
+        start = self._start
+        destination = self._destination
 
         sorted_trip = []
         current_location = start
@@ -31,23 +31,23 @@ class TripSorter:
         return sorted_trip
 
     @property
-    def starts(self):
+    def _starts(self):
         return [x["from"] for x in self.unsorted_trip]
 
     @property
-    def destinations(self):
+    def _destinations(self):
         return [x["to"] for x in self.unsorted_trip]
 
     @property
-    def start(self):
-        s = set(self.starts) - set(self.destinations)
+    def _start(self):
+        s = set(self._starts) - set(self._destinations)
         if len(s) != 1:
             raise TripSorterException("Cannot determine trip start.")
         return s.pop()
 
     @property
-    def destination(self):
-        d = set(self.destinations) - set(self.starts)
+    def _destination(self):
+        d = set(self._destinations) - set(self._starts)
         if len(d) != 1:
             raise TripSorterException("Cannot determine trip start.")
         return d.pop()
@@ -57,5 +57,5 @@ class TripSorter:
         This would mean there's a loop in the trip, and that's not allowed
         for now.
         """
-        if not all_unique(self.starts) or not all_unique(self.destinations):
+        if not all_unique(self._starts) or not all_unique(self._destinations):
             raise TripSorterException("There are duplicates in starts or destinations")
